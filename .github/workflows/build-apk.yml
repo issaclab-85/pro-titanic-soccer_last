@@ -34,11 +34,16 @@ jobs:
       - name: Install Capacitor packages
         run: npm install --no-save --legacy-peer-deps @capacitor/core @capacitor/cli @capacitor/android
 
-      - name: Init Capacitor if needed
+      - name: Configure Capacitor JSON
         run: |
-          if [ ! -f "capacitor.config.ts" ] && [ ! -f "capacitor.config.json" ]; then
-            npx cap init "Pro Titanic Soccer" "com.srstudio.protitanicsoccer" --web-dir dist
-          fi
+          rm -f capacitor.config.ts
+          cat << 'EOF' > capacitor.config.json
+          {
+            "appId": "com.srstudio.protitanicsoccer",
+            "appName": "Pro Titanic Soccer",
+            "webDir": "dist"
+          }
+          EOF
 
       - name: Add Android platform if missing
         run: |
