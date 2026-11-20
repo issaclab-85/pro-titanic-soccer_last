@@ -54,6 +54,28 @@ jobs:
       - name: Sync web build to Android
         run: npx cap sync android
 
+      - name: Fix Kotlin stdlib duplicate classes
+        run: |
+          node -e '
+            const fs = require("fs");
+            const gradlePath = "android/app/build.gradle";
+            let content = fs.readFileSync(gradlePath, "utf8");
+            const constraintBlock = `
+    constraints {
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22") {
+            because("kotlin-stdlib-1.8.22 already includes jdk7 classes")
+        }
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22") {
+            because("kotlin-stdlib-1.8.22 already includes jdk8 classes")
+        }
+    }
+`;
+            if (!content.includes("kotlin-stdlib-jdk8:1.8.22")) {
+              content = content.replace(/dependencies\s*\{/, "dependencies {" + constraintBlock);
+              fs.writeFileSync(gradlePath, content, "utf8");
+            }
+          '
+
       - name: Build Debug APK
         working-directory: android
         run: chmod +x gradlew && ./gradlew assembleDebug
