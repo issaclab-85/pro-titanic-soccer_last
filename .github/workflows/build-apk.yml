@@ -56,16 +56,23 @@ jobs:
 
       - name: Force Landscape orientation in AndroidManifest
         run: |
-          python3 -c '
-          import re
-          p = "android/app/src/main/AndroidManifest.xml"
-          s = open(p, "r", encoding="utf-8").read()
-          if "android:screenOrientation=" in s:
-              s = re.sub(r"android:screenOrientation=\"[^\"]*\"", "android:screenOrientation=\"sensorLandscape\"", s)
-          else:
-              s = re.sub(r"(<activity\b)", r"\1\n            android:screenOrientation=\"sensorLandscape\"", s, count=1)
-          open(p, "w", encoding="utf-8").write(s)
-          '
+          python3 - << 'PYEOF'
+          import xml.etree.ElementTree as ET
+
+          path = "android/app/src/main/AndroidManifest.xml"
+          android_ns = "http://schemas.android.com/apk/res/android"
+          ET.register_namespace("android", android_ns)
+
+          tree = ET.parse(path)
+          root = tree.getroot()
+          app_elem = root.find("application")
+          if app_elem is not None:
+              for act in app_elem.findall("activity"):
+                  act.set(f"{{{android_ns}}}screenOrientation", "sensorLandscape")
+                  break
+
+          tree.write(path, encoding="utf-8", xml_declaration=True)
+          PYEOF
 
       - name: Enable Immersive Sticky Fullscreen in MainActivity
         run: |
@@ -109,18 +116,22 @@ jobs:
 
       - name: Fix Kotlin stdlib duplicate classes
         run: |
-          python3 -c '
-          p = "android/app/build.gradle"
-          s = open(p, "r", encoding="utf-8").read()
-          add = """dependencies {
+          python3 - << 'PYEOF'
+          path = "android/app/build.gradle"
+          with open(path, "r", encoding="utf-8") as f:
+              content = f.read()
+
+          constraint_block = """dependencies {
               constraints {
                   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22")
                   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22")
               }"""
-          if "kotlin-stdlib-jdk8:1.8.22" not in s and "dependencies {" in s:
-              s = s.replace("dependencies {", add, 1)
-              open(p, "w", encoding="utf-8").write(s)
-          '
+
+          if "kotlin-stdlib-jdk8:1.8.22" not in content and "dependencies {" in content:
+              content = content.replace("dependencies {", constraint_block, 1)
+              with open(path, "w", encoding="utf-8") as f:
+                  f.write(content)
+          PYEOF
 
       - name: Build Debug APK
         working-directory: android
