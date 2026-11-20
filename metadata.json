@@ -1,0 +1,6 @@
+{
+  "name": "Pro Titanic Soccer",
+  "description": "3D third-person multiplayer and single-player mobile football game with Alone vs AI, LAN Team Match, club jersey customization, and dedicated outfield and goalkeeper controls.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

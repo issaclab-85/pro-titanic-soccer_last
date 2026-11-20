@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+  background-color: #05070d;
+  color-scheme: dark;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@keyframes srFadeInOut {
+  0% {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  22% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  75% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.015);
+  }
+}
+
+@keyframes srSoftFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes srStampImpact {
+  0% {
+    opacity: 0;
+    transform: scale(2.8) rotate(-7deg);
+    filter: blur(2px);
+  }
+  58% {
+    opacity: 1;
+    transform: scale(0.92) rotate(-1.5deg);
+    filter: blur(0);
+  }
+  76% {
+    opacity: 1;
+    transform: scale(1.04) rotate(-0.5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(-1deg);
+  }
+}
+
+@keyframes srStampRing {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.65);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.65);
+  }
+}
+
+.animate-sr-studio {
+  animation: srFadeInOut 3.9s ease-in-out forwards;
+}
+
+.animate-sr-subtitle {
+  animation: srSoftFadeIn 0.55s ease-out forwards;
+}
+
+.animate-sr-stamp {
+  animation: srStampImpact 0.34s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-sr-stamp-ring {
+  animation: srStampRing 0.55s ease-out forwards;
+}
