@@ -56,24 +56,17 @@ jobs:
 
       - name: Fix Kotlin stdlib duplicate classes
         run: |
-          node -e '
-            const fs = require("fs");
-            const gradlePath = "android/app/build.gradle";
-            let content = fs.readFileSync(gradlePath, "utf8");
-            const constraintBlock = `
-    constraints {
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22") {
-            because("kotlin-stdlib-1.8.22 already includes jdk7 classes")
-        }
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22") {
-            because("kotlin-stdlib-1.8.22 already includes jdk8 classes")
-        }
-    }
-`;
-            if (!content.includes("kotlin-stdlib-jdk8:1.8.22")) {
-              content = content.replace(/dependencies\s*\{/, "dependencies {" + constraintBlock);
-              fs.writeFileSync(gradlePath, content, "utf8");
-            }
+          python3 -c '
+          p = "android/app/build.gradle"
+          s = open(p, "r", encoding="utf-8").read()
+          add = """dependencies {
+              constraints {
+                  implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22")
+                  implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22")
+              }"""
+          if "kotlin-stdlib-jdk8:1.8.22" not in s and "dependencies {" in s:
+              s = s.replace("dependencies {", add, 1)
+              open(p, "w", encoding="utf-8").write(s)
           '
 
       - name: Build Debug APK
