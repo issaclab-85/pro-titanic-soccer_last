@@ -54,6 +54,59 @@ jobs:
       - name: Sync web build to Android
         run: npx cap sync android
 
+      - name: Force Landscape orientation in AndroidManifest
+        run: |
+          python3 -c '
+          import re
+          p = "android/app/src/main/AndroidManifest.xml"
+          s = open(p, "r", encoding="utf-8").read()
+          if "android:screenOrientation=" in s:
+              s = re.sub(r"android:screenOrientation=\"[^\"]*\"", "android:screenOrientation=\"sensorLandscape\"", s)
+          else:
+              s = re.sub(r"(<activity\b)", r"\1\n            android:screenOrientation=\"sensorLandscape\"", s, count=1)
+          open(p, "w", encoding="utf-8").write(s)
+          '
+
+      - name: Enable Immersive Sticky Fullscreen in MainActivity
+        run: |
+          mkdir -p android/app/src/main/java/com/srstudio/protitanicsoccer
+          cat << 'EOF' > android/app/src/main/java/com/srstudio/protitanicsoccer/MainActivity.java
+          package com.srstudio.protitanicsoccer;
+
+          import android.os.Bundle;
+          import android.view.View;
+          import android.view.WindowManager;
+          import androidx.core.view.WindowCompat;
+          import androidx.core.view.WindowInsetsCompat;
+          import androidx.core.view.WindowInsetsControllerCompat;
+          import com.getcapacitor.BridgeActivity;
+
+          public class MainActivity extends BridgeActivity {
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                  applyImmersiveMode();
+              }
+
+              @Override
+              public void onWindowFocusChanged(boolean hasFocus) {
+                  super.onWindowFocusChanged(hasFocus);
+                  if (hasFocus) {
+                      applyImmersiveMode();
+                  }
+              }
+
+              private void applyImmersiveMode() {
+                  WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+                  View decorView = getWindow().getDecorView();
+                  WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(getWindow(), decorView);
+                  controller.hide(WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.navigationBars());
+                  controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+              }
+          }
+          EOF
+
       - name: Fix Kotlin stdlib duplicate classes
         run: |
           python3 -c '
