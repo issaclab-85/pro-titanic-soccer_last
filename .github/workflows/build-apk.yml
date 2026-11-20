@@ -31,6 +31,9 @@ jobs:
       - name: Build web app
         run: npm run build
 
+      - name: Install Capacitor packages
+        run: npm install --no-save --legacy-peer-deps @capacitor/core @capacitor/cli @capacitor/android
+
       - name: Init Capacitor if needed
         run: |
           if [ ! -f "capacitor.config.ts" ] && [ ! -f "capacitor.config.json" ]; then
